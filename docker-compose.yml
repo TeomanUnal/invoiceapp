@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: finalcasedocker-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "T@2025!"
+    ports:
+      - "5433:5432"   # 5432 doluysa "5433:5432" kullan
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
