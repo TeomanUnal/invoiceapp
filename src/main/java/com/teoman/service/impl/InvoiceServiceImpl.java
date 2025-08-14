@@ -52,8 +52,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         return resp;
     }
-
-    @Override
+    
     @Transactional(noRollbackFor = RejectedInvoiceException.class)
     public Invoice saveInvoice(UserAuth auth, double amount, String productName, String billNo) {
 

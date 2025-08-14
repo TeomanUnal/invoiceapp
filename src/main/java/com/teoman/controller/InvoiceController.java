@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class InvoiceController {
     @PostMapping
     public ResponseEntity<DtoInvoiceResponse> createInvoice(
             @RequestBody @Valid DtoInvoiceRequest request,
-            @org.springframework.security.core.annotation.AuthenticationPrincipal UserAuth auth) {
+            @AuthenticationPrincipal UserAuth auth) {
 
         return ResponseEntity.ok(invoiceService.createInvoice(request, auth));
     }

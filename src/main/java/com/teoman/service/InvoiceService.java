@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface InvoiceService {
 
-    Invoice saveInvoice(UserAuth auth, double amount, String productName, String billNo);
+
 
     DtoInvoiceResponse createInvoice(DtoInvoiceRequest request, UserAuth auth);
 
