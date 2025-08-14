@@ -48,31 +48,14 @@ public class InvoiceController {
     @GetMapping("/approved")
     public ResponseEntity<List<DtoInvoiceResponse>> getApprovedInvoices() {
         log.info("Onaylı fatura listesi istendi.");
-        var list = invoiceService.getApprovedInvoices()
-                                 .stream()
-                                 .map(this::toDto)
-                                 .toList();
 
-        return ResponseEntity.ok(list);
+        return ResponseEntity.ok(invoiceService.getApprovedInvoices());
     }
 
     @GetMapping("/rejected")
     public ResponseEntity<List<DtoInvoiceResponse>> getRejectedInvoices() {
         log.info("Reddedilen fatura listesi istendi.");
-        var list = invoiceService.getRejectedInvoices()
-                                 .stream()
-                                 .map(this::toDto)
-                                 .toList();
-        return ResponseEntity.ok(list);
-    }
 
-    private DtoInvoiceResponse toDto(Invoice i) {
-        return DtoInvoiceResponse.builder()
-                                 .id(i.getId())
-                                 .billNo(i.getBillNo())
-                                 .amount(i.getAmount())
-                                 .approved(i.isApproved())
-                                 .productName(i.getProduct() != null ? i.getProduct().getProductName() : null)
-                                 .build();
+        return ResponseEntity.ok(invoiceService.getRejectedInvoicesDto());
     }
 }

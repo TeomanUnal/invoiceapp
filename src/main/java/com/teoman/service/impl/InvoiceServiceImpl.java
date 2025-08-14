@@ -1,6 +1,6 @@
 package com.teoman.service.impl;
 
-import com.teoman.exception.BusinessRuleException;
+import com.teoman.dto.DtoInvoiceResponse;
 import com.teoman.exception.RejectedInvoiceException;
 import com.teoman.exception.ResourceNotFoundException;
 import com.teoman.model.Invoice;
@@ -8,12 +8,11 @@ import com.teoman.model.Product;
 import com.teoman.model.User;
 import com.teoman.model.UserAuth;
 import com.teoman.repository.InvoiceRepository;
-import com.teoman.repository.ProductRepository;
 import com.teoman.repository.UserRepository;
-import com.teoman.service.CreditLimitService;
 import com.teoman.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,8 +25,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final UserRepository userRepository;
-    //private final ProductRepository productRepository;
-    private final CreditLimitService creditLimitService;
+
+    @Value("${credit.limit}")
+    private double creditLimit;
 
     @Override
     @Transactional(noRollbackFor = RejectedInvoiceException.class)
@@ -47,7 +47,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         // Kredi limiti kontrolü
         List<Invoice> approvedInvoices = invoiceRepository.findByUserAndApproved(user, true);
         double totalApproved = approvedInvoices.stream().mapToDouble(Invoice::getAmount).sum();
-        boolean isApproved = (totalApproved + amount) <= creditLimitService.getCreditLimit();
+        boolean isApproved = (totalApproved + amount) <= creditLimit;
 
         log.info("Toplam onaylı fatura: {}, Yeni fatura: {}, Onaylandı mı? {}", totalApproved, amount, isApproved);
 
@@ -75,18 +75,32 @@ public class InvoiceServiceImpl implements InvoiceService {
 
 
     @Override
-    public List<Invoice> getApprovedInvoices() {
+    public List<DtoInvoiceResponse> getApprovedInvoices() {
 
         log.info("Onaylı faturalar listeleniyor");
 
-        return invoiceRepository.findByApproved(true);
+        return invoiceRepository.findByApproved(true)
+                                .stream()
+                                .map(this::toDto)   // toDto private kalabilir
+                                .toList();
     }
 
     @Override
-    public List<Invoice> getRejectedInvoices() {
-
-        log.info("Reddedilen faturalar listeleniyor");
-
-        return invoiceRepository.findByApproved(false);
+    public List<DtoInvoiceResponse> getRejectedInvoicesDto() {
+        return invoiceRepository.findByApproved(false)
+                                .stream()
+                                .map(this::toDto)   // toDto private kalabilir
+                                .toList();
     }
+
+    private DtoInvoiceResponse toDto(Invoice i) {
+        return DtoInvoiceResponse.builder()
+                                 .id(i.getId())
+                                 .billNo(i.getBillNo())
+                                 .amount(i.getAmount())
+                                 .approved(i.isApproved())
+                                 .productName(i.getProduct() != null ? i.getProduct().getProductName() : null)
+                                 .build();
+    }
+
 }

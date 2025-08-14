@@ -1,5 +1,6 @@
 package com.teoman.service;
 
+import com.teoman.dto.DtoInvoiceResponse;
 import com.teoman.model.Invoice;
 import com.teoman.model.UserAuth;
 
@@ -9,6 +10,6 @@ public interface InvoiceService {
 
     Invoice saveInvoice(UserAuth auth, double amount, String productName, String billNo);
 
-    List<Invoice> getApprovedInvoices();
-    List<Invoice> getRejectedInvoices();
+    List<DtoInvoiceResponse> getApprovedInvoices();
+    List<DtoInvoiceResponse> getRejectedInvoicesDto();
 }
