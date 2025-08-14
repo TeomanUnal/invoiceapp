@@ -2,7 +2,6 @@ package com.teoman.controller;
 
 import com.teoman.dto.DtoInvoiceRequest;
 import com.teoman.dto.DtoInvoiceResponse;
-import com.teoman.model.Invoice;
 import com.teoman.model.UserAuth;
 import com.teoman.service.InvoiceService;
 import jakarta.validation.Valid;
@@ -26,23 +25,7 @@ public class InvoiceController {
             @RequestBody @Valid DtoInvoiceRequest request,
             @org.springframework.security.core.annotation.AuthenticationPrincipal UserAuth auth) {
 
-        log.info("Fatura oluşturma isteği alındı: kullanıcı={}, ürün={}, tutar={}",
-                 auth.getUsername(), request.getProductName(), request.getAmount());
-
-        Invoice invoice = invoiceService.saveInvoice(auth, request.getAmount(),
-                                                     request.getProductName(), request.getBillNo());
-
-        log.info("Fatura kaydı tamamlandı. Onay durumu: {}", invoice.isApproved());
-
-        DtoInvoiceResponse resp = DtoInvoiceResponse.builder()
-                                                    .id(invoice.getId())
-                                                    .billNo(invoice.getBillNo())
-                                                    .amount(invoice.getAmount())
-                                                    .approved(invoice.isApproved())
-                                                    .productName(invoice.getProduct().getProductName())
-                                                    .build();
-
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(invoiceService.createInvoice(request, auth));
     }
 
     @GetMapping("/approved")

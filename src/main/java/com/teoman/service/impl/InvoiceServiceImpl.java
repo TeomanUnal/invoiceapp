@@ -1,5 +1,6 @@
 package com.teoman.service.impl;
 
+import com.teoman.dto.DtoInvoiceRequest;
 import com.teoman.dto.DtoInvoiceResponse;
 import com.teoman.exception.RejectedInvoiceException;
 import com.teoman.exception.ResourceNotFoundException;
@@ -28,6 +29,29 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Value("${credit.limit}")
     private double creditLimit;
+
+    @Override
+    @Transactional(noRollbackFor = RejectedInvoiceException.class)
+    public DtoInvoiceResponse createInvoice(DtoInvoiceRequest request, UserAuth auth) {
+
+        log.info("Fatura oluşturma isteği alındı: kullanıcı={}, ürün={}, tutar={}",
+                 auth.getUsername(), request.getProductName(), request.getAmount());
+
+        Invoice invoice = saveInvoice(auth, request.getAmount(),
+                                                     request.getProductName(), request.getBillNo());
+
+        log.info("Fatura kaydı tamamlandı. Onay durumu: {}", invoice.isApproved());
+
+        DtoInvoiceResponse resp = DtoInvoiceResponse.builder()
+                                                    .id(invoice.getId())
+                                                    .billNo(invoice.getBillNo())
+                                                    .amount(invoice.getAmount())
+                                                    .approved(invoice.isApproved())
+                                                    .productName(invoice.getProduct().getProductName())
+                                                    .build();
+
+        return resp;
+    }
 
     @Override
     @Transactional(noRollbackFor = RejectedInvoiceException.class)
@@ -72,7 +96,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         return saved;
 
     }
-
 
     @Override
     public List<DtoInvoiceResponse> getApprovedInvoices() {
